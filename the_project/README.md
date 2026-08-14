@@ -1,8 +1,8 @@
-```
-npm install
-npm run dev
-```
+# Todo app
 
-```
-open http://localhost:3000
+## deployment
+
+Deploy the app to a k8s cluster with
+```sh
+kubectl create deployment todo-app --image=joveful/todo-app1
 ```
