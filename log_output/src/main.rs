@@ -40,14 +40,14 @@ async fn main() -> std::io::Result<()> {
         }
     });
 
-    println!("Starting HTTP server on 127.0.0.1:3000");
+    println!("Starting HTTP server on 0.0.0.0:3000");
 
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(Arc::clone(&id)))
             .service(status)
     })
-    .bind(("127.0.0.1", 3000))?
+    .bind(("0.0.0.0", 3000))?
     .run()
     .await
 }
