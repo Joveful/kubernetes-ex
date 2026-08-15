@@ -14,4 +14,7 @@ spec:
     spec:
       containers:
         - name: todoapp
-          image: joveful/todo-app1
+          image: joveful/todo-app1:v2
+          env:
+          - name: PORT
+            value: "3000"
