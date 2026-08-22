@@ -8,3 +8,4 @@ Deploy the apps to k8s cluster with
 ```sh
 kubectl apply -f manifests
 ```
+With the k3d cluster set as per the course material, the apps are available from `localhost:8081`.
