@@ -1,0 +1,14 @@
+/Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/deps/serde-640bb6dba11e606d.d: /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/build/serde-873e1529b740ad63/out/private.rs
+
+/Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/deps/libserde-640bb6dba11e606d.rlib: /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/build/serde-873e1529b740ad63/out/private.rs
+
+/Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/deps/libserde-640bb6dba11e606d.rmeta: /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/build/serde-873e1529b740ad63/out/private.rs
+
+/Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs:
+/Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs:
+/Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs:
+/Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:
+/Users/jori/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs:
+/Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/build/serde-873e1529b740ad63/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/jori/Projects/kubernetes-ex/log_output/log_server/target/debug/build/serde-873e1529b740ad63/out
