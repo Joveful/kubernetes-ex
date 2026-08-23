@@ -13,16 +13,17 @@ spec:
         app: log-output
     spec:
       volumes:
-        - name: shared-logs
-          emptyDir: {}
+        - name: shared-image
+          persistentVolumeClaim:
+            claimName: image-claim
       containers:
         - name: log-output
           image: joveful/log-writer1
           volumeMounts:
-          - name: shared-logs
+          - name: shared-image
             mountPath: /usr/src/app/files
         - name: log-server
-          image: joveful/log-server1
+          image: joveful/log-server2
           volumeMounts:
-          - name: shared-logs
+          - name: shared-image
             mountPath: /usr/src/app/files
