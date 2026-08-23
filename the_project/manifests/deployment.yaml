@@ -12,9 +12,13 @@ spec:
       labels:
         app: todoapp
     spec:
+      volumes:
+        - name: shared-image
+          persistentVolumeClaim:
+            claimName: image-claim
       containers:
         - name: todoapp
-          image: joveful/todo-app1:v2
+          image: joveful/todo-app2
           env:
           - name: PORT
             value: "3000"
