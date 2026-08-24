@@ -19,6 +19,16 @@ fn write_ping_count(path: &Path, count: usize) -> std::io::Result<()> {
     file.flush()
 }
 
+fn read_ping_count(path: &Path) -> std::io::Result<usize> {
+    match fs::read_to_string(path) {
+        Ok(contents) => contents.trim().parse().map_err(|error| {
+            std::io::Error::new(std::io::ErrorKind::InvalidData, error)
+        }),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(0),
+        Err(error) => Err(error),
+    }
+}
+
 fn build_pong_response(counter: Arc<AtomicUsize>) -> std::io::Result<String> {
     let value = counter.fetch_add(1, Ordering::SeqCst);
     write_ping_count(Path::new(PING_COUNT_FILE), value + 1)?;
@@ -39,7 +49,8 @@ async fn pong(state: web::Data<Counter>) -> impl Responder {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     fs::create_dir_all("/usr/src/app/files")?;
-    let counter = Arc::new(AtomicUsize::new(0));
+    let count = read_ping_count(Path::new(PING_COUNT_FILE))?;
+    let counter = Arc::new(AtomicUsize::new(count));
     let port = std::env::var("PORT").unwrap_or_else(|_| "4000".to_string());
 
     println!("Listening on http://0.0.0.0:{port}");
