@@ -19,6 +19,9 @@ spec:
       containers:
         - name: todoapp
           image: joveful/todo-app2
+          volumeMounts:
+            - name: shared-image
+              mountPath: /usr/src/app/data
           env:
           - name: PORT
             value: "3000"
