@@ -6,12 +6,14 @@ import { dirname, join } from 'node:path'
 
 const PORT = Number(process.env.PORT) || 3000
 const CACHE_DURATION_MS = 10 * 60 * 1000
-const imagePath = join(process.cwd(), 'data', 'picsum.jpg')
-const metadataPath = join(process.cwd(), 'data', 'picsum.json')
+const imagePath = join(process.cwd(), '/data/picsum.jpg')
+const metadataPath = join(process.cwd(), '/data/picsum.json')
 
 const app = new Hono()
 
 app.get('/', async (c) => {
+  ensureImageCache()
+
   return c.html(html`<!doctype html>
     <html lang="en">
       <head>
