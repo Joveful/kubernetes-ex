@@ -2,8 +2,8 @@
 
 ## deployment
 
-Deploy the app to a k8s cluster with
+The course materials have the instructions for setting up a k3s cluster. Deploy the app to a Kubernetes cluster with
 ```sh
 kubectl apply -f manifests/deployment.yaml
 ```
-Following the k3s cluster deployment instructions in the course materials, the app can be accessed through `localhost:8081`
+Now, the app can be accessed through `localhost:8081`
