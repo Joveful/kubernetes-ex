@@ -20,12 +20,31 @@ app.get('/', async (c) => {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Todo app</title>
+        <link rel="stylesheet" href="/client.css" />
       </head>
       <body>
-        <h1>Todo app</h1>
-        <img src="/image" alt="Random image" />
+        <main id="root"></main>
+        <script type="module" src="/app.js"></script>
       </body>
     </html>`)
+})
+
+app.get('/app.js', async (c) => {
+  const client = await readFile(join(process.cwd(), 'dist/client.js'))
+
+  return c.body(client, 200, {
+    'Content-Type': 'text/javascript; charset=UTF-8',
+    'Cache-Control': 'no-cache'
+  })
+})
+
+app.get('/client.css', async (c) => {
+  const styles = await readFile(join(process.cwd(), 'dist/client.css'))
+
+  return c.body(styles, 200, {
+    'Content-Type': 'text/css; charset=UTF-8',
+    'Cache-Control': 'no-cache'
+  })
 })
 
 app.get('/image', async (c) => {
@@ -38,7 +57,7 @@ app.get('/image', async (c) => {
 })
 
 async function downloadImage() {
-  const response = await fetch('https://picsum.photos/1200')
+  const response = await fetch('https://picsum.photos/1200/800')
 
   if (!response.ok) {
     throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`)
