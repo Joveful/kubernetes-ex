@@ -1,0 +1,25 @@
+{
+  "name": "todo-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "lsof -ti :4173 | xargs -r kill",
+    "dev": "PORT=4173 tsx watch src/index.ts",
+    "build": "tsc && esbuild src/client.tsx src/client.css --bundle --outdir=dist --format=esm",
+    "start": "PORT=4173 node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "hono": "^4.13.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "esbuild": "^0.25.9",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2"
+  }
+}
