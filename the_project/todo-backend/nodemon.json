@@ -1,0 +1,8 @@
+{
+  "watch": ["src"],
+  "ext": "ts,json",
+  "ignore": ["dist", "node_modules"],
+  "exec": "PORT=4010 node --import tsx src/index.ts",
+  "restartable": "rs",
+  "signal": "SIGTERM"
+}
