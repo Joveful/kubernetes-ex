@@ -20,3 +20,15 @@
 
 - [2.1](https://github.com/Joveful/kubernetes-ex/tree/2.1/log_output)
 - [2.2](https://github.com/Joveful/kubernetes-ex/tree/2.2/the_project)
+
+## Setup
+
+The cluster can be set up with
+```sh
+k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
+```
+
+For volumes, setting up a temporary folder
+```sh
+docker exec k3d-k3s-default-agent-0 mkdir -p /tmp/kube
+```
