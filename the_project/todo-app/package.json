@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "lsof -ti :4173 | xargs -r kill",
-    "dev": "PORT=4173 tsx watch src/index.ts",
+    "predev": "lsof -ti :3000 | xargs -r kill",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc && esbuild src/client.tsx src/client.css --bundle --outdir=dist --format=esm",
-    "start": "PORT=4173 node dist/index.js"
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",

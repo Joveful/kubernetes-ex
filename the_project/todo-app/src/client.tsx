@@ -6,7 +6,7 @@ type Todo = {
   title: string
 }
 
-const API_URL = `http://${window.location.hostname}:4010/todos`
+const API_URL = `http://localhost:8081/todos`
 
 function TodoApp() {
   const [todo, setTodo] = useState('')
