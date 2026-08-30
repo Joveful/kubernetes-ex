@@ -3,7 +3,8 @@ use std::fs;
 use actix_web::{App, HttpResponse, HttpServer, Responder, get};
 
 const STATUS_FILE: &str = "/usr/src/app/files/logs.txt";
-const PING_COUNT_FILE: &str = "/usr/src/app/files/pingpong.txt";
+// const STATUS_FILE: &str = "../log_writer/files/logs.txt";
+// const PING_COUNT_FILE: &str = "/usr/src/app/files/pingpong.txt";
 
 fn latest_log_line(contents: &str) -> Option<&str> {
     contents.lines().rev().find(|line| !line.trim().is_empty())
@@ -27,14 +28,28 @@ async fn home() -> impl Responder {
         None => return HttpResponse::NotFound().body("status file is empty"),
     };
 
-    let ping_count = match fs::read_to_string(PING_COUNT_FILE) {
-        Ok(count) => count.trim().to_string(),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            return HttpResponse::NotFound().body("ping count is not available yet");
-        }
+    // let ping_count = match fs::read_to_string(PING_COUNT_FILE) {
+    //     Ok(count) => count.trim().to_string(),
+    //     Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+    //         return HttpResponse::NotFound().body("ping count is not available yet");
+    //     }
+    //     Err(error) => {
+    //         eprintln!("failed to read ping count: {error}");
+    //         return HttpResponse::InternalServerError().body("failed to read ping count");
+    //     }
+    // };
+
+    let ping_count = match reqwest::get("http://pingpong-svc:2346/pings").await {
+        Ok(response) => match response.text().await {
+            Ok(count) => count,
+            Err(error) => {
+                eprintln!("failed to read ping count response: {error}");
+                return HttpResponse::InternalServerError().body("failed to read ping count");
+            }
+        },
         Err(error) => {
-            eprintln!("failed to read ping count: {error}");
-            return HttpResponse::InternalServerError().body("failed to read ping count");
+            eprintln!("failed to fetch ping count: {error}");
+            return HttpResponse::InternalServerError().body("failed to fetch ping count");
         }
     };
 

@@ -1,4 +1,4 @@
-use std::fs;
+use std::{eprintln, fs};
 use std::io::Write;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -7,6 +7,7 @@ use std::sync::Arc;
 use actix_web::{App, HttpResponse, HttpServer, Responder, get, web};
 
 const PING_COUNT_FILE: &str = "/usr/src/app/files/pingpong.txt";
+// const PING_COUNT_FILE: &str = "./files/pingpong.txt";
 
 #[derive(Clone)]
 struct Counter {
@@ -32,7 +33,7 @@ fn read_ping_count(path: &Path) -> std::io::Result<usize> {
 fn build_pong_response(counter: Arc<AtomicUsize>) -> std::io::Result<String> {
     let value = counter.fetch_add(1, Ordering::SeqCst);
     write_ping_count(Path::new(PING_COUNT_FILE), value + 1)?;
-    Ok(format!("pong {}", value))
+    Ok(format!("pong {}", value + 1))
 }
 
 #[get("/pingpong")]
@@ -46,9 +47,23 @@ async fn pong(state: web::Data<Counter>) -> impl Responder {
     }
 }
 
+#[get("/pings")]
+async fn pings() -> impl Responder {
+    match read_ping_count(Path::new(PING_COUNT_FILE)) {
+        Ok(value) => HttpResponse::Ok()
+            .content_type("text/plain; charset=utf-8")
+            .body(value.to_string()),
+        Err(error) => {
+            eprintln!("failed to read ping count: {error}");
+            HttpResponse::InternalServerError().body("failed to read ping count")
+        }
+    }
+
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    fs::create_dir_all("/usr/src/app/files")?;
+    // fs::create_dir_all("/usr/src/app/files")?;
     let count = read_ping_count(Path::new(PING_COUNT_FILE))?;
     let counter = Arc::new(AtomicUsize::new(count));
     let port = std::env::var("PORT").unwrap_or_else(|_| "4000".to_string());
@@ -61,6 +76,7 @@ async fn main() -> std::io::Result<()> {
                 counter: Arc::clone(&counter),
             }))
             .service(pong)
+            .service(pings)
     })
     .bind(("0.0.0.0", port.parse().unwrap()))?
     .run()

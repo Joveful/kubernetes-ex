@@ -28,6 +28,7 @@ fn main() -> std::io::Result<()> {
 
     let id = Uuid::new_v4();
     let status_file = std::path::Path::new("/usr/src/app/files/logs.txt");
+    // let status_file = std::path::Path::new("./files/logs.txt");
 
     loop {
         write_status_to_file(status_file, &id)?;

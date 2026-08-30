@@ -23,7 +23,7 @@ spec:
           - name: shared-image
             mountPath: /usr/src/app/files
         - name: log-server
-          image: joveful/log-server2
+          image: joveful/log-server4
           volumeMounts:
           - name: shared-image
             mountPath: /usr/src/app/files

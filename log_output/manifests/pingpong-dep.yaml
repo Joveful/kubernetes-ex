@@ -13,12 +13,11 @@ spec:
         app: pingpong
     spec:
       volumes:
-        - name: shared-image
-          persistentVolumeClaim:
-            claimName: image-claim
+        - name: ping-vol
+          emptyDir: {}
       containers:
         - name: pingpong
-          image: joveful/pingpong2
+          image: joveful/pingpong3
           volumeMounts:
-            - name: shared-image
-              mountPath: /usr/src/app/files
+          - mountPath: /usr/src/app/files
+            name: ping-vol
