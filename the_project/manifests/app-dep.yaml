@@ -18,7 +18,7 @@ spec:
             claimName: image-claim
       containers:
         - name: todoapp
-          image: joveful/todo-app3
+          image: joveful/todo-app4
           volumeMounts:
             - name: shared-image
               mountPath: /app/data
