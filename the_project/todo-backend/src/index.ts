@@ -72,7 +72,7 @@ export function createApp() {
 const shouldStartServer = process.env.NODE_ENV !== 'test'
 
 if (shouldStartServer) {
-  const PORT = Number(process.env.PORT) || 4000
+  const PORT = Number(process.env.PORT) || 4004
   const app = createApp()
 
   serve(

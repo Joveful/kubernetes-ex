@@ -4,7 +4,8 @@ import { html } from 'hono/html'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-const PORT = Number(process.env.PORT) || 3000
+// Default port number won't work with the k8s deployment
+const PORT = Number(process.env.PORT) || 3003
 const CACHE_DURATION_MS = 10 * 60 * 1000
 const appRoot = process.cwd()
 const distPath = join(appRoot, 'dist')
