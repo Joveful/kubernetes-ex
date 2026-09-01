@@ -26,3 +26,5 @@ spec:
           env:
           - name: PORT
             value: "3000"
+          - name: API_URL
+            value: "http://localhost:8081/todos"
