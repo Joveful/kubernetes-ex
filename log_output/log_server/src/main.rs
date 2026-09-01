@@ -3,6 +3,7 @@ use std::fs;
 use actix_web::{App, HttpResponse, HttpServer, Responder, get};
 
 const STATUS_FILE: &str = "/usr/src/app/files/logs.txt";
+const CONFIG_FILE: &str = "/etc/config/information.txt";
 // const STATUS_FILE: &str = "../log_writer/files/logs.txt";
 // const PING_COUNT_FILE: &str = "/usr/src/app/files/pingpong.txt";
 
@@ -12,6 +13,20 @@ fn latest_log_line(contents: &str) -> Option<&str> {
 
 #[get("/")]
 async fn home() -> impl Responder {
+    // Read config file
+    let config_contents = match fs::read_to_string(CONFIG_FILE) {
+        Ok(contents) => contents,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return HttpResponse::NotFound().body("config file is not available yet");
+        }
+        Err(error) => {
+            eprintln!("failed to read config file: {error}");
+            return HttpResponse::InternalServerError().body("failed to read config file");
+        }
+    };
+
+    let message = std::env::var("MESSAGE").unwrap_or_else(|_| "message not set".to_string());
+
     let status_contents = match fs::read_to_string(STATUS_FILE) {
         Ok(contents) => contents,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
@@ -28,15 +43,10 @@ async fn home() -> impl Responder {
         None => return HttpResponse::NotFound().body("status file is empty"),
     };
 
-    // let ping_count = match fs::read_to_string(PING_COUNT_FILE) {
-    //     Ok(count) => count.trim().to_string(),
-    //     Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-    //         return HttpResponse::NotFound().body("ping count is not available yet");
-    //     }
-    //     Err(error) => {
-    //         eprintln!("failed to read ping count: {error}");
-    //         return HttpResponse::InternalServerError().body("failed to read ping count");
-    //     }
+    // Parse timestamp and uuid from latest_line (format: "TIMESTAMP: UUID")
+    // let (timestamp, uuid) = match latest_line.split_once(':') {
+    //     Some((ts, id)) => (ts.trim().to_string(), id.trim().to_string()),
+    //     None => return HttpResponse::InternalServerError().body("invalid status line format"),
     // };
 
     let ping_count = match reqwest::get("http://pingpong-svc:2346/pings").await {
@@ -53,9 +63,14 @@ async fn home() -> impl Responder {
         }
     };
 
+    let response_body = format!(
+        "file content: {}env variable: MESSAGE={}\n{}\nPing / Pongs: {}",
+        config_contents, message, latest_line, ping_count
+    );
+
     HttpResponse::Ok()
         .content_type("text/plain; charset=utf-8")
-        .body(format!("{latest_line}\nPing / Pongs: {ping_count}"))
+        .body(response_body)
 }
 
 #[get("/status")]
