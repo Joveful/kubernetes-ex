@@ -17,6 +17,9 @@ spec:
         - name: shared-image
           persistentVolumeClaim:
             claimName: image-claim
+        - name: config
+          configMap:
+            name: log-output-configmap
       containers:
         - name: log-output
           image: joveful/log-writer1
@@ -24,7 +27,15 @@ spec:
           - name: shared-image
             mountPath: /usr/src/app/files
         - name: log-server
-          image: joveful/log-server4
+          image: joveful/log-server5
+          env:
+          - name: MESSAGE
+            valueFrom:
+              configMapKeyRef:
+                name: log-output-configmap
+                key: message
           volumeMounts:
           - name: shared-image
             mountPath: /usr/src/app/files
+          - name: config
+            mountPath: /etc/config
