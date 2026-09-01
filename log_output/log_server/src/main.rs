@@ -43,12 +43,6 @@ async fn home() -> impl Responder {
         None => return HttpResponse::NotFound().body("status file is empty"),
     };
 
-    // Parse timestamp and uuid from latest_line (format: "TIMESTAMP: UUID")
-    // let (timestamp, uuid) = match latest_line.split_once(':') {
-    //     Some((ts, id)) => (ts.trim().to_string(), id.trim().to_string()),
-    //     None => return HttpResponse::InternalServerError().body("invalid status line format"),
-    // };
-
     let ping_count = match reqwest::get("http://pingpong-svc:2346/pings").await {
         Ok(response) => match response.text().await {
             Ok(count) => count,
