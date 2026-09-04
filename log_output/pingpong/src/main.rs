@@ -1,80 +1,65 @@
-use std::{eprintln, fs};
-use std::io::Write;
-use std::path::Path;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
-
 use actix_web::{App, HttpResponse, HttpServer, Responder, get, web};
-
-const PING_COUNT_FILE: &str = "/usr/src/app/files/pingpong.txt";
-// const PING_COUNT_FILE: &str = "./files/pingpong.txt";
-
-#[derive(Clone)]
-struct Counter {
-    counter: Arc<AtomicUsize>,
-}
-
-fn write_ping_count(path: &Path, count: usize) -> std::io::Result<()> {
-    let mut file = fs::File::create(path)?;
-    write!(file, "{count}")?;
-    file.flush()
-}
-
-fn read_ping_count(path: &Path) -> std::io::Result<usize> {
-    match fs::read_to_string(path) {
-        Ok(contents) => contents.trim().parse().map_err(|error| {
-            std::io::Error::new(std::io::ErrorKind::InvalidData, error)
-        }),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(0),
-        Err(error) => Err(error),
-    }
-}
-
-fn build_pong_response(counter: Arc<AtomicUsize>) -> std::io::Result<String> {
-    let value = counter.fetch_add(1, Ordering::SeqCst);
-    write_ping_count(Path::new(PING_COUNT_FILE), value + 1)?;
-    Ok(format!("pong {}", value + 1))
-}
+use sqlx::{PgPool, postgres::PgPoolOptions};
 
 #[get("/pingpong")]
-async fn pong(state: web::Data<Counter>) -> impl Responder {
-    match build_pong_response(state.counter.clone()) {
-        Ok(value) => HttpResponse::Ok().body(value),
+async fn pong(pool: web::Data<PgPool>) -> impl Responder {
+    match sqlx::query_scalar::<_, i64>(
+        "UPDATE ping_count SET count = count + 1 WHERE id = 1 RETURNING count",
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    {
+        Ok(count) => HttpResponse::Ok().body(format!("pong {count}")),
         Err(error) => {
-            eprintln!("failed to write ping count: {error}");
-            HttpResponse::InternalServerError().body("failed to write ping count")
+            eprintln!("failed to increment ping count: {error}");
+            HttpResponse::InternalServerError().body("failed to increment ping count")
         }
     }
 }
 
 #[get("/pings")]
-async fn pings() -> impl Responder {
-    match read_ping_count(Path::new(PING_COUNT_FILE)) {
+async fn pings(pool: web::Data<PgPool>) -> impl Responder {
+    match sqlx::query_scalar::<_, i64>("SELECT count FROM ping_count WHERE id = 1")
+        .fetch_one(pool.get_ref())
+        .await
+    {
         Ok(value) => HttpResponse::Ok()
             .content_type("text/plain; charset=utf-8")
             .body(value.to_string()),
         Err(error) => {
-            eprintln!("failed to read ping count: {error}");
+            eprintln!("failed to read ping count from database: {error}");
             HttpResponse::InternalServerError().body("failed to read ping count")
         }
     }
-
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // fs::create_dir_all("/usr/src/app/files")?;
-    let count = read_ping_count(Path::new(PING_COUNT_FILE))?;
-    let counter = Arc::new(AtomicUsize::new(count));
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("failed to connect to PostgreSQL");
+
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS ping_count (id INTEGER PRIMARY KEY, count BIGINT NOT NULL)",
+    )
+    .execute(&pool)
+    .await
+    .expect("failed to create ping_count table");
+    sqlx::query("INSERT INTO ping_count (id, count) VALUES (1, 0) ON CONFLICT (id) DO NOTHING")
+        .execute(&pool)
+        .await
+        .expect("failed to initialize ping count");
+
     let port = std::env::var("PORT").unwrap_or_else(|_| "4000".to_string());
 
     println!("Listening on http://0.0.0.0:{port}");
 
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(Counter {
-                counter: Arc::clone(&counter),
-            }))
+            .app_data(web::Data::new(pool.clone()))
             .service(pong)
             .service(pings)
     })
