@@ -1,27 +1,85 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+import { Pool } from 'pg'
 
 export type Todo = {
   id: string
   title: string
 }
 
-export function createApp() {
-  const app = new Hono()
-  const todos: Todo[] = [
-    {
-      id: 'learn-kubernetes',
-      title: 'Learn Kubernetes basics'
+export type TodoStore = {
+  list(): Promise<Todo[]>
+  create(title: string): Promise<Todo>
+}
+
+const seedTodos: Todo[] = [
+  {
+    id: 'seed-learn-kubernetes',
+    title: 'Learn Kubernetes basics'
+  },
+  {
+    id: 'seed-deploy-app',
+    title: 'Deploy application to cluster'
+  },
+  {
+    id: 'seed-persistent-volumes',
+    title: 'Configure persistent volumes'
+  }
+]
+
+function createMemoryStore(): TodoStore {
+  const todos = seedTodos.map((todo) => ({ ...todo }))
+
+  return {
+    async list() {
+      return todos
     },
-    {
-      id: 'deploy-app',
-      title: 'Deploy application to cluster'
-    },
-    {
-      id: 'persistent-volumes',
-      title: 'Configure persistent volumes'
+    async create(title) {
+      const todo = { id: crypto.randomUUID(), title }
+      todos.push(todo)
+      return todo
     }
-  ]
+  }
+}
+
+export async function createPostgresStore(): Promise<TodoStore> {
+  const pool = new Pool({
+    host: process.env.PGHOST || 'postgres-svc',
+    port: Number(process.env.PGPORT) || 5432,
+    database: process.env.PGDATABASE || 'todos',
+    user: process.env.PGUSER || 'postgres',
+    password: process.env.PGPASSWORD || 'postgres'
+  })
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todos (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL
+    )
+  `)
+
+  for (const todo of seedTodos) {
+    await pool.query(
+      'INSERT INTO todos (id, title) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING',
+      [todo.id, todo.title]
+    )
+  }
+
+  return {
+    async list() {
+      const result = await pool.query<Todo>('SELECT id, title FROM todos ORDER BY id')
+      return result.rows
+    },
+    async create(title) {
+      const todo = { id: crypto.randomUUID(), title }
+      await pool.query('INSERT INTO todos (id, title) VALUES ($1, $2)', [todo.id, todo.title])
+      return todo
+    }
+  }
+}
+
+export function createApp(store: TodoStore = createMemoryStore()) {
+  const app = new Hono()
 
   app.use('/todos', async (c, next) => {
     c.header('Access-Control-Allow-Origin', '*')
@@ -35,8 +93,8 @@ export function createApp() {
     await next()
   })
 
-  app.get('/todos', (c) => {
-    return c.json(todos)
+  app.get('/todos', async (c) => {
+    return c.json(await store.list())
   })
 
   app.post('/todos', async (c) => {
@@ -56,12 +114,7 @@ export function createApp() {
       return c.json({ error: 'Todos must be 140 characters or fewer.' }, 400)
     }
 
-    const todo: Todo = {
-      id: crypto.randomUUID(),
-      title
-    }
-
-    todos.push(todo)
+    const todo = await store.create(title)
 
     return c.json(todo, 201)
   })
@@ -73,15 +126,19 @@ const shouldStartServer = process.env.NODE_ENV !== 'test'
 
 if (shouldStartServer) {
   const PORT = Number(process.env.PORT) || 4004
-  const app = createApp()
 
-  serve(
-    {
-      fetch: app.fetch,
-      port: PORT
-    },
-    (info) => {
-      console.log(`Todo backend listening on port ${info.port}`)
-    }
-  )
+  void createPostgresStore().then((store) => {
+    serve(
+      {
+        fetch: createApp(store).fetch,
+        port: PORT
+      },
+      (info) => {
+        console.log(`Todo backend listening on port ${info.port}`)
+      }
+    )
+  }).catch((error) => {
+    console.error('Unable to initialize PostgreSQL:', error)
+    process.exitCode = 1
+  })
 }
