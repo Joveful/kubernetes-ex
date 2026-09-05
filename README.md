@@ -24,6 +24,7 @@
 - [2.4](https://github.com/Joveful/kubernetes-ex/tree/2.4/The_project)
 - [2.5](https://github.com/Joveful/kubernetes-ex/tree/2.5/log_output)
 - [2.6](https://github.com/Joveful/kubernetes-ex/tree/2.6/The_project)
+- [2.7](https://github.com/Joveful/kubernetes-ex/tree/2.7/log_output)
 
 ## Setup
 
