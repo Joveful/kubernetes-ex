@@ -1,3 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-backend-config
+  namespace: project
+data:
+  PORT: "4000"
+  PGHOST: postgres-svc
+  PGPORT: "5432"
+  PGDATABASE: todos
+  PGUSER: postgres
+  PGPASSWORD: postgres
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +28,7 @@ spec:
     spec:
       containers:
         - name: todoapp
-          image: joveful/todo-backend1
-          env:
-          - name: PORT
-            value: "4000"
+          image: joveful/todo-backend2
+          envFrom:
+          - configMapRef:
+              name: todo-backend-config
