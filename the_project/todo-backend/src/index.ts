@@ -82,6 +82,8 @@ export function createApp(store: TodoStore = createMemoryStore()) {
   const app = new Hono()
 
   app.use('/todos', async (c, next) => {
+    console.log(`${c.req.method} ${c.req.path}`)
+
     c.header('Access-Control-Allow-Origin', '*')
     c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     c.header('Access-Control-Allow-Headers', 'Content-Type')
