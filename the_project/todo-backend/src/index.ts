@@ -129,6 +129,7 @@ export function createApp(store: TodoStore = createMemoryStore()) {
 
     const todo = await store.create(title)
 
+    console.log(`POST /todos; input: ${input}`)
     return c.json(todo, 201)
   })
 
