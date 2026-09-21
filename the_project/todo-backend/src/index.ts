@@ -100,19 +100,30 @@ export function createApp(store: TodoStore = createMemoryStore()) {
   })
 
   app.post('/todos', async (c) => {
-    const body = await c.req.json().catch(() => null)
+    const input = await c.req.text()
+    let body: unknown
 
-    if (!body || typeof body.title !== 'string') {
+    try {
+      body = JSON.parse(input)
+    } catch {
+      console.log(`POST /todos rejected: invalid JSON; input: ${input}`)
+      return c.json({ error: 'A todo title is required.' }, 400)
+    }
+
+    if (!body || typeof body !== 'object' || !('title' in body) || typeof body.title !== 'string') {
+      console.log(`POST /todos rejected: a todo title is required; input: ${input}`)
       return c.json({ error: 'A todo title is required.' }, 400)
     }
 
     const title = body.title.trim()
 
     if (!title) {
+      console.log(`POST /todos rejected: todo title cannot be empty; input: ${input}`)
       return c.json({ error: 'Todo title cannot be empty.' }, 400)
     }
 
     if (title.length > 140) {
+      console.log(`POST /todos rejected: todo title exceeds 140 characters; input: ${input}`)
       return c.json({ error: 'Todos must be 140 characters or fewer.' }, 400)
     }
 
